@@ -1,0 +1,967 @@
+/* =========================================================
+   yoga.css
+   THIS IS A REFINEMENT of your "closer" CSS file.
+   It adds styles for the new filter/listing layout.
+   ========================================================= */
+
+/* --- Your existing styles --- */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Lato:wght@400;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Hides the original sidebar on screens smaller than 992px */
+        @media (max-width: 991.98px) {
+            aside.col-lg-3 {
+                display: none;
+            }
+        }
+        
+        /* This makes the modal scrollable if the filter list is too long,
+           and gives your content padding.
+        */
+        .modal-body .filter-sidebar {
+             /* Remove the desktop-specific styles for the modal */
+            box-shadow: none;
+            padding: 0;
+        }
+
+        /* Your original .filter-scroll-box might be too tall for a modal.
+          This makes them a bit smaller, but only *inside* the modal.
+        */
+        #filterModal .filter-scroll-box {
+            max-height: 150px; /* Adjust as needed */
+        }
+
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: "Open Sans", "Lato", sans-serif;
+  color: #0f1724;
+  background: #fff;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+}
+
+/* --- Your Navbar/Banner styles (Unchanged) --- */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px 5%;
+  background: #fff;
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+.navbar.sticky {
+  padding: 10px 5%;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+.navbar .container {
+  max-width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar-brand {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f1724;
+}
+.navbar-nav {
+  display: flex;
+  gap: 30px;
+}
+.nav-link {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.dropdown-menu {
+  border-radius: 12px;
+  border: 1px solid #e6eef6;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+}
+.dropdown-item {
+  font-weight: 600;
+}
+.dropdown-item:active {
+  background-color: #1b71ff;
+  color: #fff;
+}
+.navbar-toggler {
+  border: none;
+}
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    flex-direction: column;
+    width: 100%;
+    padding: 20px 0;
+    gap: 10px;
+  }
+}
+
+.banner-video {
+  height: 60vh;
+  object-fit: cover;
+}
+.banner-overlay {
+  max-width: 800px;
+}
+.banner-heading {
+  font-size: 3rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+}
+.banner-subtext {
+  font-size: 1.25rem;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+}
+.search-bar-wrapper {
+  margin-top: -50px;
+  position: relative;
+  z-index: 10;
+}
+.search-card {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.search-left {
+  flex-grow: 1;
+}
+.search-card input.form-control,
+.search-card select.form-select {
+  padding: 0.75rem 0.5rem;
+  font-size: 1rem;
+  height: auto;
+  background: none;
+  border: none !important;
+  box-shadow: none !important;
+}
+.btn-search {
+  background: linear-gradient(90deg,#2c8bff,#1b71ff);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+}
+#liveSearchResults {
+  top: calc(100% + 5px);
+  left: 0;
+  border: 1px solid #e6eef6;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+@media (max-width: 575.98px) {
+  .search-card form {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .search-left {
+    border-bottom: 1px solid #e6eef6;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .btn-search {
+    width: 100%;
+  }
+}
+
+/* ----------------------------
+   NEW: Root Variables (from ref)
+---------------------------- */
+:root {
+  --font-body: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-text: #4a4a4a;
+  --color-text-light: #757575;
+  --color-heading: #2d3138;
+  --color-primary: #007A87; 
+  --color-primary-dark: #005f6a;
+  --color-secondary: #FFB400;
+  --color-border: #e0e0e0;
+  --color-bg-light: #f8f8f8;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* ----------------------------
+   NEW: Body & Main Content
+---------------------------- */
+body.results-page-body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background-color: var(--color-bg-light);
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.main-content {
+  padding-top: 4rem; 
+}
+@media (max-width: 991.98px) {
+  .main-content {
+    padding-top: 2rem;
+  }
+}
+
+/* ----------------------------
+   NEW: FILTER SIDEBAR (from refr.mp4)
+---------------------------- */
+.filter-sidebar {
+  background-color: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+@media (min-width: 992px) {
+  .filter-sidebar.sticky-sidebar {
+    position: sticky;
+    /* 'top' value is set by JS in index.php */
+  }
+}
+
+.filter-section {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.filter-section:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+.filter-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.filter-title-new {
+  background-color: #01836b;
+  width:45px;
+  font-size: 1.1rem;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.filter-content {
+  font-size: 0.9rem;
+}
+.filter-scroll-box {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+.filter-content .form-check {
+  margin-bottom: 0.5rem;
+}
+.filter-content .form-check-label {
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+.form-check-input:checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.filter-content .form-control {
+  font-size: 0.9rem;
+}
+.btn-apply-filters {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem;
+}
+.btn-apply-filters:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: #fff;
+}
+.btn-clear-filters {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  font-weight: 700;
+  padding: 0.75rem;
+}
+.btn-clear-filters:hover {
+  background-color: var(--color-bg-light);
+  color: var(--color-primary);
+}
+
+/* =========================================================
+   NEW: Styles to fix Accordion/Dropdown buttons
+   (Add this to the end of your yoga.css file)
+   ========================================================= */
+
+.filter-show-more {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+.filter-show-more:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+/* This is the main accordion container */
+.filter-accordion {
+  /* Override all of Bootstrap's default styles */
+  --bs-accordion-bg: #fff;
+  --bs-accordion-border-width: 0;
+  --bs-accordion-btn-focus-box-shadow: none;
+  --bs-accordion-active-color: var(--color-primary);
+  --bs-accordion-active-bg: #fff;
+  --bs-accordion-btn-padding-x: 0; /* Remove horizontal padding */
+  --bs-accordion-btn-padding-y: 0.75rem; /* Keep vertical padding */
+  --bs-accordion-btn-color: var(--color-heading);
+  
+  /* Replace Bootstrap's chevron with a + icon */
+  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232d3138'%3e%3cpath fill-rule='evenodd' d='M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z'/%3e%3c/svg%3e");
+  --bs-accordion-btn-icon-width: 1rem;
+  
+  /* Replace the active chevron with a - icon */
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23007A87'%3e%3cpath fill-rule='evenodd' d='M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z'/%3e%3c/svg%3e");
+}
+
+.filter-accordion-item {
+  /* Add a simple line between items, like the reference */
+  border-top: 1px solid var(--color-border);
+}
+.filter-accordion-item:first-of-type {
+  /* Remove the border from the very first item */
+  border-top: none;
+}
+
+.filter-accordion-button {
+  /* Font styling to match the reference */
+  font-family: var(--font-body);
+  font-weight: 700; /* Bolder, as in reference */
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.filter-accordion-button:not(.collapsed) {
+  /* Stop it from showing a box shadow on click */
+  box-shadow: none;
+}
+
+/* Stop the ugly icon rotation */
+.filter-accordion-button::after {
+  transition: none;
+  transform: none; /* Disable the 180-degree turn */
+}
+.filter-accordion-button:not(.collapsed)::after {
+  transform: none; /* Disable the 180-degree turn */
+}
+
+.filter-accordion-body {
+  padding: 0;
+  padding-left: 1rem; /* Indent the content inside */
+  padding-bottom: 0.75rem;
+}
+
+/* Your custom class for the 'New' title */
+.filter-title-new {
+  background-color: #01836b;
+  width: 45px;
+  font-size: 1.1rem;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 0.5rem; /* Reduced margin */
+  padding: 0.1rem 0.25rem; /* Added padding */
+  border-radius: 4px; /* Added border-radius */
+}
+
+/* Your custom class for the main 'Filters' title */
+.filter-title-bold {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--color-heading);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+}
+
+/* =========================================================
+   NEW: Styles for Custom Filter Dropdown
+   (This fixes the icon alignment)
+   ========================================================= */
+
+/* This is the link (<a> tag) that triggers the dropdown */
+.filter-collapse-trigger {
+  display: block; /* <--- CHANGED: Was 'flex' */
+  /* justify-content: space-between; */ /* <-- REMOVED */
+  /* align-items: center; */ /* <-- REMOVED */
+  width: 100%;
+  padding: 0.5rem 0;
+  /* font-weight: 700; */ /* Your change is kept */
+  /* font-size: 1.1rem; */ /* Your change is kept */
+  color: var(--color-heading);
+  text-decoration: none;
+  border-top: 1px solid var(--color-border);
+}
+
+/* === ADD THIS NEW RULE === */
+/* This is the <div> *inside* your link */
+.sb-sidenav-collapse-arrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Style for the first trigger, so it doesn't have a border-top */
+.filter-section:first-of-type .filter-collapse-trigger {
+  border-top: none;
+}
+
+/* Target your icon (using 'fas' to be safe) */
+.filter-collapse-trigger .fa-angle-down,
+.filter-collapse-trigger .fas.fa-angle-down {
+  /* font-size: 1.25rem; */ /* Your change is kept */
+  color: var(--color-primary); 
+  transition: transform 0.2s ease-in-out; 
+}
+
+/* Rotate the icon when the dropdown is open (matches ref video) */
+.filter-collapse-trigger[aria-expanded="true"] .fa-angle-down,
+.filter-collapse-trigger[aria-expanded="true"] .fas.fa-angle-down {
+  transform: rotate(180deg);
+}
+
+/* This is the content area that opens up */
+.filter-collapse-body {
+  padding-left: 1rem; /* Indents the checkboxes */
+  padding-top: 0.5rem;
+}
+
+/* =========================================================
+   NEW: Styles to make filter sidebar "stretchy"
+   and match the body background
+   ========================================================= */
+
+/* This is the main sidebar container */
+.filter-sidebar {
+  background-color: transparent; /* 1. Make background same as body */
+  border: none;                  /* 2. Remove the border */
+  padding: 0;                    /* 3. Remove padding to make it "stretchy" */
+}
+
+/* This is the title "Filters" */
+.filter-title-bold {
+  border-bottom: none; /* Remove the border under "Filters" */
+  padding-bottom: 0;   /* Remove padding to reduce compactness */
+}
+
+/* This is each filter group (Deals, Dates, etc.) */
+.filter-section {
+  /* 3. Make it "stretchy" by adding more space */
+  margin-bottom: 2rem;
+  padding-bottom: 0;
+  border-bottom: none; /* 1. Remove the dividing lines */
+}
+
+/* This is the content inside a filter (checkboxes, etc.) */
+.filter-content {
+  /* 3. Make it "stretchy" by removing extra padding */
+  padding: 0; 
+}
+
+/* This is the link (<a> tag) that triggers the dropdown */
+.filter-collapse-trigger {
+  /* 1. Remove the dividing line */
+  border-top: none; 
+}
+
+/* ----------------------------
+   NEW: RESULTS COLUMN (from ref11.png)
+---------------------------- */
+/* =========================================================
+   REPLACE your old .results-header style with this
+   ========================================================= */
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  /* These lines are now REMOVED to match the reference */
+  /* background-color: #fff; */
+  /* padding: 1rem 1.5rem; */
+  /* border: 1px solid var(--color-border); */
+  /* border-radius: 12px; */
+}
+
+.results-count {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  margin-bottom: 0;
+}
+.sort-by-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sort-by-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0;
+}
+.sort-by-form .form-select {
+  width: auto;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+@media (max-width: 575px) {
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
+.package-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Space between cards */
+}
+
+/* =========================================================
+   REPLACE your old card styles with this new block
+   ========================================================= */
+
+/* -------------------------------------
+   NEW: Horizontal Package Card (matches your 5 points)
+------------------------------------- */
+.package-card-horizontal {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+.package-card-horizontal:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-5px);
+}
+.horizontal-image-wrapper {
+  position: relative;
+  height: 100%;
+}
+.horizontal-image-link {
+  display: block;
+  height: 100%;
+}
+.horizontal-image {
+  height: 100%;
+  min-height: 250px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px 0 0 12px;
+}
+@media (max-width: 767.98px) {
+  .horizontal-image {
+    border-radius: 12px 12px 0 0;
+  }
+}
+.btn-wishlist {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background-color: rgba(255,255,255,0.9);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--color-heading);
+  z-index: 2;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.btn-wishlist:hover {
+  color: #e0245e;
+  background-color: #fff;
+  transform: scale(1.1);
+}
+.package-card-tag-best {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  background-color: var(--color-secondary);
+  color: var(--color-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  z-index: 2;
+}
+
+/* 1. Main Body Section */
+.horizontal-body {
+  padding: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+/* NEW: Card Header (Req 1 & 2) */
+.card-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+.card-top-left {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+.card-top-left i {
+  color: var(--color-primary);
+}
+.card-top-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+.card-top-right span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.card-top-right .bi-star-fill {
+  color: var(--color-secondary);
+}
+
+.package-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.75rem; /* Increased margin */
+}
+.package-card-title a {
+  color: var(--color-heading);
+  text-decoration: none;
+}
+.package-card-title a:hover {
+  color: var(--color-primary);
+}
+
+/* NEW: Facilities (Req 3) */
+.package-card-facilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 1rem;
+}
+.package-card-facilities span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.package-card-facilities i {
+  font-size: 1.1rem;
+}
+
+/* REMOVED .package-card-organizer (it's not in ref) */
+/* REMOVED .package-card-reviews (moved to header) */
+/* REMOVED .package-card-info-bar (moved to footer) */
+
+
+/* 2. Bottom Footer Section */
+.horizontal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Changed from flex-end */
+  padding: 1rem 1.5rem;
+  background-color: var(--color-bg-light);
+  border-top: 1px solid var(--color-border);
+  border-radius: 0 0 12px 0;
+}
+@media (max-width: 767.98px) {
+  .horizontal-footer {
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+/* NEW: Left Footer (Req 4) */
+.footer-left-info {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+.footer-left-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+.footer-left-info i {
+  color: var(--color-primary);
+  font-size: 1.1rem;
+}
+
+/* NEW: Right Footer (Req 5) */
+.footer-price-action {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.package-card-price-label {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  display: block;
+  text-align: right; /* Align to the right */
+}
+.package-card-price-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+.btn-view-deal {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.btn-view-deal:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: #fff;
+}
+
+/* =========================================================
+   NEW: Styles to refine yoga_navbar.php
+   (Matches reference fonts, weights, and colors)
+   ========================================================= */
+
+/* Use the new font variables on the navbar */
+.navbar {
+  font-family: var(--font-body);
+  /* Use the theme's shadow */
+  box-shadow: var(--shadow-md) !important; 
+}
+
+/* 1. Style the Logo */
+.navbar-brand {
+  font-family: var(--font-heading) !important;
+  font-weight: 900 !important; /* Make it bold like the ref */
+  font-size: 1.3rem !important;
+  color: #0a6c61 !important; /* Use theme's teal color */
+  letter-spacing: -1px;
+}
+/* This is your 'text-teal' class, just in case */
+.text-teal {
+  color: #00ae85 !important;
+}
+
+/* 2. Style the Center Links */
+.navbar-nav .nav-link {
+  font-family: var(--font-heading) !important;
+  font-weight: 500 !important; /* Bold */
+  font-size: 1rem !important;
+  color: #000000 !important; /* Dark grey, not black */
+  padding: 0.5rem 1rem;
+}
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: #0e826d !important; /* Teal on hover */
+}
+
+/* 3. Style the Right-side Icons */
+.navbar .d-flex.align-items-center.gap-3 {
+  color: var(--color-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.navbar .d-flex.align-items-center.gap-3 a {
+  color: var(--color-heading);
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+.navbar .d-flex.align-items-center.gap-3 a:hover {
+  color: var(--color-primary);
+}
+.navbar .dropdown a i {
+  font-size: 1.5rem !important; /* Make person icon a bit larger */
+    text-decoration: none;
+
+}
+
+/* =========================================================
+   NEW: Fix for Footer
+   - Makes footer dark
+   - Makes social icons horizontal
+   ========================================================= */
+
+/* 1. Make the footer background darker */
+.footer_ {
+  background: #dbdcdc; /* This is a very dark grey */
+  color: #000000;     /* Light text color */
+  padding: 60px 5% 30px;
+}
+.footer_ h3.footer_title {
+  color: #000000;
+}
+.footer_ a,
+.footer_ .footer_text,
+.footer_ .newsletter_text,
+.footer_ .copy_right {
+  color: #232323;
+}
+.footer_ a:hover {
+  color: #000000;
+}
+.footer_ .copy-right_text {
+  border-top: 1px solid #374151; /* Dark border */
+}
+
+/* 2. Fix for vertical social icons */
+.socail_links ul {
+  display: flex;            /* This is the magic line */
+  flex-direction: row;      /* Explicitly set to horizontal */
+  gap: 15px;                /* Keeps your spacing */
+  padding-left: 0;          /* Removes default list padding */
+  margin-bottom: 0;         /* Removes default list margin */
+}
+.socail_links li {
+  list-style: none;         /* Removes the bullets */
+}
+.socail_links a {
+  color: #303031;           /* Make icons visible */
+  font-size: 1.25rem;       /* Make icons a bit bigger */
+  text-decoration: none;
+}
+.socail_links a:hover {
+  color: #323232; 
+  text-decoration: none;
+}
+
+
+
+/* ---------- Fixed Social Bar Styling -----------*/
+.social-sidebar {
+    position: fixed;
+    bottom: 150px;
+    right: 30px;
+    z-index: 999;
+}
+
+.social-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Use flexbox to align items */
+    flex-direction: column; /* This is the fix for the upside-down issue */
+}
+
+.social-sidebar li {
+    margin-top: 10px; /* Spacing between icons */
+    position: relative; /* Crucial for absolute positioning of child elements */
+}
+
+/* Base styles for all icons */
+.social-sidebar a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    background-color: #555;
+    color: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-sidebar a:hover {
+    transform: scale(1.1);
+}
+
+/* Specific colors for icons */
+.social-sidebar li:nth-last-child(1) a { background-color: #25D366; } /* WhatsApp */
+.social-sidebar li:nth-last-child(2) a { background-color: #0077b5; } /* Phone */
+.social-sidebar li:nth-last-child(3) a { background-color: #d93025; } /* Email */
+.social-sidebar li:nth-last-child(4) a { background-color: #555; } /* More button */
+
+/* Extra Icons (initially hidden and off-screen) */
+.social-sidebar .hidden-item {
+    position: absolute; /* Position relative to the parent LI */
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform: scale(0) translateX(0); /* Start hidden */
+}
+
+/* ---------------------------------------------------- */
+/* Final positions when parent has 'active' class */
+/* ---------------------------------------------------- */
+.social-sidebar.active .hidden-item:nth-child(1) {
+    transform: scale(1) translate(-60px, 0); /* First icon moves left */
+    transition-delay: 0.1s;
+}
+
+.social-sidebar.active .hidden-item:nth-child(2) {
+    transform: scale(1) translate(-40px, -40px); /* Second icon moves left-up */
+    transition-delay: 0.2s;
+}
+
+.social-sidebar.active .hidden-item:nth-child(3) {
+    transform: scale(1) translate(0, -60px); /* Third icon moves up */
+    transition-delay: 0.3s;
+}
+
+/* Specific colors for the hidden social icons */
+.social-sidebar .hidden-item:nth-child(1) a { background-color: #FF0000; } /* Youtube */
+.social-sidebar .hidden-item:nth-child(2) a { background-color: #C13584; } /* Instagram */
+.social-sidebar .hidden-item:nth-child(3) a { background-color: #1877F2; } /* Facebook */

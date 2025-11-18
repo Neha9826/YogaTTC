@@ -1,0 +1,215 @@
+/* General Mobile Fixes */
+@media (max-width: 768px) {
+    /* Ensures all images scale down */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Prevents horizontal overflow */
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Adjusts padding and margins for smaller screens */
+    .container, .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Make hero sections, etc., fit on mobile */
+    .bradcam_area, .about_area, .about_main_info {
+        padding: 50px 0;
+    }
+}
+
+/*
+* Corrected CSS for Main Slider
+* This code sets a consistent min-height and ensures background images are responsive.
+* This replaces all previous slider-related fixes to prevent conflicts.
+*/
+.slider_active, .single_slider {
+    min-height: 650px; /* Ensures the slider always has a minimum height */
+    position: relative;
+}
+
+.slider_bg_1, .slider_bg_2 {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+@media (max-width: 768px) {
+    /* Adjust height and font sizes for mobile to look better */
+    .slider_active, .single_slider {
+        min-height: 450px; /* A more compact height for mobile */
+    }
+
+    .slider_bg_1, .slider_bg_2 {
+        background-attachment: scroll; /* Prevents parallax effect on mobile */
+    }
+}
+
+.room-thumbnail {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.room-thumbnail:hover {
+    transform: scale(1.02);
+}
+
+.single_offers {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    transition: all 0.3s ease-in-out;
+}
+
+.single_offers:hover {
+    transform: translateY(-5px);
+}
+
+.room-cards {
+    /* display: flex; */
+    /* flex-direction: column; */
+    justify-content: space-between;
+    /* height: 100%; */
+    min-height: 350px;
+    max-height: 350px;
+    /* padding: 20px; */
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    /* border-radius: 10px; */
+    background-color: #fff;
+    margin-bottom: 20px;
+    margin-top: 20;
+}
+
+/* Corrected CSS for Room Info Bar Responsiveness */
+.room-info-bar {
+    background-color: #f0f8ff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: center;
+    font-size: 16px;
+}
+
+.room-info-bar h4 {
+    margin: 0;
+    color: #0d47a1;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.room-info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .room-info-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px; /* Adjust spacing for mobile */
+    }
+}
+
+.bradcam_area {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.about_area {
+    padding: 30px 0 60px 0 !important; /* top, right, bottom, left */
+}
+
+.about_area h2 {
+    margin-top: 0 !important;
+}
+
+/* Fixed Social Bar Styling */
+.social-sidebar {
+    position: fixed;
+    bottom: 150px;
+    right: 30px;
+    z-index: 999;
+}
+
+.social-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Use flexbox to align items */
+    flex-direction: column; /* This is the fix for the upside-down issue */
+}
+
+.social-sidebar li {
+    margin-top: 10px; /* Spacing between icons */
+    position: relative; /* Crucial for absolute positioning of child elements */
+}
+
+/* Base styles for all icons */
+.social-sidebar a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    background-color: #555;
+    color: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-sidebar a:hover {
+    transform: scale(1.1);
+}
+
+/* Specific colors for icons */
+.social-sidebar li:nth-last-child(1) a { background-color: #25D366; } /* WhatsApp */
+.social-sidebar li:nth-last-child(2) a { background-color: #0077b5; } /* Phone */
+.social-sidebar li:nth-last-child(3) a { background-color: #d93025; } /* Email */
+.social-sidebar li:nth-last-child(4) a { background-color: #555; } /* More button */
+
+/* Extra Icons (initially hidden and off-screen) */
+.social-sidebar .hidden-item {
+    position: absolute; /* Position relative to the parent LI */
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform: scale(0) translateX(0); /* Start hidden */
+}
+
+/* ---------------------------------------------------- */
+/* Final positions when parent has 'active' class */
+/* ---------------------------------------------------- */
+.social-sidebar.active .hidden-item:nth-child(1) {
+    transform: scale(1) translate(-60px, 0); /* First icon moves left */
+    transition-delay: 0.1s;
+}
+
+.social-sidebar.active .hidden-item:nth-child(2) {
+    transform: scale(1) translate(-40px, -40px); /* Second icon moves left-up */
+    transition-delay: 0.2s;
+}
+
+.social-sidebar.active .hidden-item:nth-child(3) {
+    transform: scale(1) translate(0, -60px); /* Third icon moves up */
+    transition-delay: 0.3s;
+}
+
+/* Specific colors for the hidden social icons */
+.social-sidebar .hidden-item:nth-child(1) a { background-color: #FF0000; } /* Youtube */
+.social-sidebar .hidden-item:nth-child(2) a { background-color: #C13584; } /* Instagram */
+.social-sidebar .hidden-item:nth-child(3) a { background-color: #1877F2; } /* Facebook */
