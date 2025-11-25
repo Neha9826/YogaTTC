@@ -290,507 +290,13 @@ if ($gridCount === 0 && !$first_video) {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/yoga.css">
+  <link rel="stylesheet" href="css/yPackages.css">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <style>
-    :root {
-      --brand-color: #008080; /* Teal color from reference */
-      --brand-color-dark: #006666;
-      --brand-color-light: #e6f2f2;
-      --star-color: #ffb400;
-      --text-body: #333;
-      --text-muted: #666;
-      --border-color: #e0e0e0;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color: var(--text-body);
-      background-color: #f8f9fa;
-    }
-
-    body a {
-      color: var(--brand-color);
-      text-decoration: none;
-    }
-    
-    /* Remove the old hero */
-    .hero { display: none; }
-
-    /* --- New Gallery Grid (Dynamic) --- */
-    .gallery-grid {
-      display: grid;
-      gap: 8px;
-      height: 450px; /* Adjust height as needed */
-      max-width: 1200px;
-      margin: 1rem auto;
-      padding: 0 1rem;
-    }
-    .gallery-item {
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .gallery-item.video-item {
-        background: #000;
-        position: relative;
-    }
-    .gallery-item video,
-    .gallery-item iframe {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
-    
-    /* 1 Image Layout */
-    .gallery-grid.gallery-count-1 {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr;
-    }
-    .gallery-grid.gallery-count-1 .gallery-item:first-child {
-      grid-column: 1 / 2;
-      grid-row: 1 / 2;
-    }
-
-    /* 2 Image Layout */
-    .gallery-grid.gallery-count-2 {
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: 1fr;
-    }
-    .gallery-grid.gallery-count-2 .gallery-item:first-child { grid-column: 1 / 2; grid-row: 1 / 2; }
-    .gallery-grid.gallery-count-2 .gallery-item:nth-child(2) { grid-column: 2 / 3; grid-row: 1 / 2; }
-
-    /* 3 Image Layout */
-    .gallery-grid.gallery-count-3 {
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-    }
-    .gallery-grid.gallery-count-3 .gallery-item:first-child { grid-column: 1 / 3; grid-row: 1 / 3; }
-    .gallery-grid.gallery-count-3 .gallery-item:nth-child(2) { grid-column: 3 / 5; grid-row: 1 / 2; }
-    .gallery-grid.gallery-count-3 .gallery-item:nth-child(3) { grid-column: 3 / 5; grid-row: 2 / 3; }
-
-    /* 4 Image Layout */
-    .gallery-grid.gallery-count-4 {
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-    }
-    .gallery-grid.gallery-count-4 .gallery-item:first-child { grid-column: 1 / 3; grid-row: 1 / 3; }
-    .gallery-grid.gallery-count-4 .gallery-item:nth-child(2) { grid-column: 3 / 4; grid-row: 1 / 2; }
-    .gallery-grid.gallery-count-4 .gallery-item:nth-child(3) { grid-column: 4 / 5; grid-row: 1 / 2; }
-    .gallery-grid.gallery-count-4 .gallery-item:nth-child(4) { grid-column: 3 / 5; grid-row: 2 / 3; }
-
-    /* 5 Image Layout (Original) */
-    .gallery-grid.gallery-count-5 {
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-    }
-    .gallery-grid.gallery-count-5 .gallery-item:first-child { grid-column: 1 / 3; grid-row: 1 / 3; }
-    .gallery-grid.gallery-count-5 .gallery-item:nth-child(2) { grid-column: 3 / 4; grid-row: 1 / 2; }
-    .gallery-grid.gallery-count-5 .gallery-item:nth-child(3) { grid-column: 4 / 5; grid-row: 1 / 2; }
-    .gallery-grid.gallery-count-5 .gallery-item:nth-child(4) { grid-column: 3 / 4; grid-row: 2 / 3; }
-    .gallery-grid.gallery-count-5 .gallery-item:nth-child(5) { grid-column: 4 / 5; grid-row: 2 / 3; }
-    
-    .gallery-item .view-all-btn {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      background-color: rgba(255, 255, 255, 0.9);
-      color: #000;
-      border: 1px solid #ccc;
-    }
-    
-    @media (max-width: 767px) {
-      .gallery-grid {
-        height: 300px;
-        /* Force 1-column layout on mobile regardless of count */
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr;
-      }
-      .gallery-item:not(:first-child) {
-        display: none; /* Hide smaller images on mobile */
-      }
-      .gallery-item:first-child {
-        grid-column: 1 / 2;
-        grid-row: 1 / 2;
-      }
-      .gallery-item .view-all-btn {
-        bottom: 0.5rem;
-        right: 0.5rem;
-        font-size: 0.8rem;
-        padding: 0.25rem 0.5rem;
-      }
-    }
-    
-    /* --- Page Header --- */
-    .page-header h1 {
-      font-size: 2.25rem;
-      font-weight: 700;
-      color: #111;
-      margin-bottom: 0.5rem;
-    }
-    .page-header .location,
-    .page-header .reviews-link {
-      font-size: 1rem;
-      color: var(--text-muted);
-    }
-    .page-header .reviews-link .bi-star-fill {
-      color: var(--star-color);
-    }
-    
-    /* --- Main Content Layout --- */
-    .content-section {
-      background-color: #fff;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #111;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    /* --- Share Box --- */
-    .share-box-inline {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .share-box-inline h6 {
-      margin: 0;
-      font-weight: 600;
-    }
-    .share-box-inline .share-icon {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      text-decoration: none;
-    }
-    .share-box-inline .share-icon:hover { color: var(--brand-color); }
-
-    /* --- Highlights / Amenities --- */
-    .highlight-list {
-      padding-left: 0;
-      list-style-type: none;
-      columns: 2;
-    }
-    .highlight-list li {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.95rem;
-    }
-    .highlight-list .icon {
-      color: var(--brand-color);
-      font-size: 1.25rem;
-    }
-    @media (max-width: 576px) {
-      .highlight-list { columns: 1; }
-    }
-
-    /* --- Instructors --- */
-    .instructor-card {
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1rem;
-      background-color: #fff;
-    }
-    .instructor-photo {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 50%;
-    }
-    .instructor-card h6 {
-      font-weight: 600;
-      color: var(--brand-color);
-    }
-    
-    /* --- Sticky Booking Box --- */
-    .booking-box-sticky {
-      /* position: sticky; */
-      top: 20px;
-      background-color: #fff;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .booking-box-header {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .booking-box-header .price-from {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-    .booking-box-header .price-main {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #111;
-    }
-    .booking-box-header .price-person {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-    .booking-box-body {
-      padding: 1.25rem;
-    }
-    .booking-box-body .form-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    
-    /* Batch/Date selection */
-    .batch-option {
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .batch-option:hover {
-      background-color: #f8f8f8;
-    }
-    .batch-option.active {
-      border-color: var(--brand-color);
-      background-color: var(--brand-color-light);
-      box-shadow: 0 0 0 2px var(--brand-color-light);
-    }
-    .batch-option strong { font-size: 0.9rem; }
-    .batch-option .small { font-size: 0.8rem; }
-    .selectBatchBtn {
-      font-size: 0.85rem;
-      padding: 0.25rem 0.75rem;
-    }
-    
-    /* Accommodation selection */
-    #accomList .list-group-item {
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-    }
-    #accomList .list-group-item input[type="radio"] {
-      margin-right: 0.5rem;
-    }
-    #accomList .list-group-item:hover {
-      background-color: #f8f8f8;
-    }
-    #accomList .list-group-item.active {
-       background-color: var(--brand-color-light);
-       border-color: var(--brand-color);
-       color: var(--text-body); /* <-- ADD THIS LINE */
-    }
-    .accom-price {
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: #ab1111ff;
-    }
-    .show-photos-btn {
-      font-size: 0.85rem;
-      text-decoration: none;
-      font-weight: 500;
-      color: var(--brand-color);
-    }
-    .show-photos-btn:hover {
-      text-decoration: underline;
-    }
-    
-    /* Booking Buttons */
-    .booking-btn-group {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-      /* padding-top: 1rem; */
-    }
-
-    /* --- ADD THIS ENTIRE NEW RULE --- */
-    .booking-box-sticky {
-      position: sticky;
-      top: 20px;
-    }
-    .booking-box-footer {
-      position: sticky;
-      bottom: 0; /* The point where it will "stick" */
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
-      background-color: #fff; /* Ensures it's opaque */
-      margin-top: auto; /* Pushes it to the bottom */
-      /* border-bottom-left-radius: 8px; /* Match parent card */
-      /* border-bottom-right-radius: 8px; /* Match parent card */
-      border-radius: 8px;
-      width: 350px;
-      align-self: flex-end;
-      /* box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); */
-      margin-left: auto;
-    }
-
-    .booking-btn-group .btn {
-      padding: 0.75rem;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 6px;
-    }
-    .btn-brand-primary {
-      background-color: var(--brand-color);
-      border-color: var(--brand-color);
-      color: #fff;
-    }
-    .btn-brand-primary:hover {
-      background-color: var(--brand-color-dark);
-      border-color: var(--brand-color-dark);
-      color: #fff;
-    }
-    .btn-brand-outline {
-      background-color: #fff;
-      border-color: var(--brand-color);
-      color: var(--brand-color);
-    }
-    .btn-brand-outline:hover {
-      background-color: var(--brand-color-light);
-      border-color: var(--brand-color);
-      color: var(--brand-color);
-    }
-
-    /* Remove old fixed buttons */
-    .fixed-booking-buttons { display: none; }
-    
-    /* Responsive Booking Box (becomes static on mobile) */
-    /* --- REPLACE YOUR ENTIRE @media BLOCK WITH THIS --- */
-    
-    @media (max-width: 991.98px) {
-      /* 1. Make the desktop sidebar become a static block */
-      .booking-box-sticky {
-        position: static;
-        top: auto;
-        margin-top: 1.5rem;
-      }
-
-      /* 2. Hide the desktop buttons (which are inside the sidebar) */
-      .booking-box-sticky .booking-btn-group {
-        display: none; 
-      }
-      
-      /* 3. Show the mobile-only fixed-bottom buttons */
-      .fixed-booking-buttons {
-        display: block; /* This overrides the 'd-lg-none' */
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #fff;
-        padding: 0.75rem;
-        border-top: 1px solid var(--border-color);
-        z-index: 1000;
-      }
-      
-      /* 4. Add padding to the bottom of the page */
-      body {
-        padding-bottom: 70px; /* Space for fixed buttons */
-      }
-    }
-    /* --- END OF REPLACEMENT --- */
-
-    /* ===========================
-   RESPONSIVE FIXES – packageDetails
-   Focus: Header Gallery & CTA Buttons
-   =========================== */
-
-    /* ----- Gallery grid responsiveness ----- */
-    @media (max-width: 1199px) {
-      .gallery-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px !important;
-      }
-    }
-
-    @media (max-width: 767px) {
-      .gallery-grid {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-      }
-      .gallery-grid img,
-      .gallery-grid video {
-        width: 100% !important;
-        height: auto !important;
-        object-fit: cover !important;
-      }
-    }
-
-    /* Center gallery inside container for small screens */
-    @media (max-width: 575px) {
-      .gallery-grid {
-        margin: 0 auto;
-        max-width: 95%;
-      }
-    }
-
-
-    /* ----- “Request to Book” + “Send Inquiry” Buttons ----- */
-    @media (max-width: 991px) {
-      .booking-cta-buttons {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-        position: static !important;
-        width: 100% !important;
-        margin-top: 15px !important;
-      }
-      .booking-cta-buttons .btn {
-        width: 100% !important;
-        font-size: 1rem !important;
-        padding: 12px !important;
-      }
-    }
-
-    /* For smaller mobiles, fix button text wrapping and stacking */
-    @media (max-width: 575px) {
-      .booking-cta-buttons .btn {
-        font-size: 0.9rem !important;
-        padding: 10px !important;
-      }
-      .booking-cta-buttons {
-        margin-top: 20px !important;
-      }
-    }
-
-    /* ----- Optional tweak for sticky button behavior ----- */
-    @media (max-width: 480px) {
-      .booking-cta-buttons {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        background: #fff !important;
-        padding: 10px !important;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        z-index: 999;
-      }
-    }
-
-  </style>
+  
 </head>
 <body class="yoga-page">
-
-<?php include __DIR__ . '/yoga_navbar.php'; ?>
-
-
+<?php include 'yoga_navbar.php'; ?>
 <div class="gallery-grid gallery-count-<?= $gridCount ?>">
     
     <?php 
@@ -897,124 +403,163 @@ if ($gridCount === 0 && !$first_video) {
           <p><?= nl2br(esc($pkg['retreat_full'] ?: 'Program details will be updated.')) ?></p>
         </section>
 
+        <div class="d-flex justify-content-end w-100">
+          <button type="button" id="globalToggleBtn" class="expand-toggle-btn">
+              <i class="bi bi-plus-lg"></i> <span>Expand all</span>
+          </button>
+      </div>
+
+      <div class="share-box-inline mb-4">
+          </div>
+
         <section class="content-section" id="highlights_overview">
-            <h2 class="section-title">Retreat Highlights</h2>
-            <div class="rich-content">
-                <?php 
-                    if (!empty($pkg['highlights'])) {
-                        echo $pkg['highlights']; // Outputting raw HTML
-                    } else {
-                        echo "<p class='text-muted'>No highlights have been added for this package.</p>";
-                    }
-                ?>
+            <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseHighlights">
+                <h3 class="section-title" style="border:none;">Retreat Highlights</h3>
+                <i class="bi bi-chevron-down chevron-icon"></i>
             </div>
-          </section>
+            <div class="collapse" id="collapseHighlights">
+                <div class="rich-content">
+                    <?php 
+                        if (!empty($pkg['highlights'])) {
+                            echo $pkg['highlights']; 
+                        } else {
+                            echo "<p class='text-muted'>No highlights have been added for this package.</p>";
+                        }
+                    ?>
+                </div>
+            </div>
+        </section>
         
         <section class="content-section">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5 class="fw-bold mb-2">Skill level</h5>
-                    <?php if (!empty($levels)): ?>
-                      <p><?= esc(implode(', ', $levels)) ?></p>
-                    <?php else: ?>
-                      <p class="text-muted">All levels</p>
-                    <?php endif; ?>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="fw-bold mb-2">Yoga styles</h5>
-                    <p><?= esc($pkg['retreat_style'] ?: 'General Yoga') ?></p>
+            <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseSkills">
+                <h3 class="section-title mb-0" style="border:none;">Skill Level & Styles</h3>
+                <i class="bi bi-chevron-down chevron-icon"></i>
+            </div>
+            <div class="collapse" id="collapseSkills">
+                <div class="row pt-3">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-2">Skill level</h5>
+                        <?php if (!empty($levels)): ?>
+                          <p><?= esc(implode(', ', $levels)) ?></p>
+                        <?php else: ?>
+                          <p class="text-muted">All levels</p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-2">Yoga styles</h5>
+                        <p><?= esc($pkg['retreat_style'] ?: 'General Yoga') ?></p>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section class="content-section" id="accommodation">
-            <h2 class="section-title">Accommodation Overview</h2>
-            <div class="rich-content"> 
-              <p class="text-muted">
-              <?php 
-                  if (!empty($pkg['accommodation_overview'])) {
-                      // Outputting raw HTML from editor
-                      echo $pkg['accommodation_overview']; 
-                  } else {
-                      // Default text from user's prompt
-                      echo '<p class="text-muted">SunArt Center offers rooms with wooden furnishings and wall panels. Most rooms have a private balcony where guests can sit and enjoy views of the sea. The private bathrooms provide a shower and bath toiletries.</p>';
-                  }
-              ?>
-              </p>
+            <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseAccom">
+                <h3 class="section-title mb-0" style="border:none;">Accommodation</h3>
+                <i class="bi bi-chevron-down chevron-icon"></i>
             </div>
-          </section>
-          <section class="content-section">
-          <h2 class="section-title">Facilities</h2>
-          <?php if (!empty($amenities)): ?>
-            <ul class="highlight-list">
-              <?php foreach ($amenities as $am): ?>
-                <li>
-                  <i class="icon <?= esc($am['icon_class'] ?: 'bi-check-circle-fill') ?>"></i>
-                  <span><?= esc($am['name']) ?></span>
-                </li>
-              <?php endforeach; ?>
-            </ul>
-          <?php else: ?>
-            <p class="text-muted">No facilities listed yet.</p>
-          <?php endif; ?>
+            <div class="collapse" id="collapseAccom">
+                <div class="rich-content"> 
+                  <p class="text-muted">
+                  <?php 
+                      if (!empty($pkg['accommodation_overview'])) {
+                          echo $pkg['accommodation_overview']; 
+                      } else {
+                          echo '<p class="text-muted">Accommodation details not available.</p>';
+                      }
+                  ?>
+                  </p>
+                </div>
+            </div>
         </section>
 
         <section class="content-section">
-          <h2 class="section-title">Program</h2>
-          <?php if (!empty($pkg['program'])): ?>
-            <div class="program-content">
-              <?= $pkg['program'] ?>
+          <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseFacilities">
+            <h3 class="section-title mb-0" style="border:none;">Facilities</h3>
+            <i class="bi bi-chevron-down chevron-icon"></i>
+          </div>
+          <div class="collapse" id="collapseFacilities">
+            <?php if (!empty($amenities)): ?>
+              <ul class="highlight-list">
+                <?php foreach ($amenities as $am): ?>
+                  <li>
+                    <i class="icon <?= esc($am['icon_class'] ?: 'bi-check-circle-fill') ?>"></i>
+                    <span><?= esc($am['name']) ?></span>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            <?php else: ?>
+              <p class="text-muted">No facilities listed yet.</p>
+            <?php endif; ?>
+          </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseProgram">
+                <h3 class="section-title mb-0" style="border:none;">Program</h3>
+                <i class="bi bi-chevron-down chevron-icon"></i>
             </div>
-          <?php else: ?>
-            <p class="text-muted">No program details available for this package.</p>
-          <?php endif; ?>
+            <div class="collapse" id="collapseProgram">
+                <?php if (!empty($pkg['program'])): ?>
+                <div class="program-content">
+                  <?= $pkg['program'] ?>
+                </div>
+                <?php else: ?>
+                <p class="text-muted pt-2">No program details available.</p>
+                <?php endif; ?>
+            </div>
         </section>
 
         <section class="content-section" id="included">
-            <h2 class="section-title">What's Included</h2>
-            <div class="rich-content">
-                <?php 
-                    if (!empty($pkg['whats_included'])) {
-                        echo $pkg['whats_included']; 
-                    } else {
-                        echo "<p class='text-muted'>No details provided for what's included.</p>";
-                    }
-                ?>
+            <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseIncluded">
+                <h3 class="section-title mb-0" style="border:none;">What's Included</h3>
+                <i class="bi bi-chevron-down chevron-icon"></i>
             </div>
-          </section>
+            <div class="collapse" id="collapseIncluded">
+                <div class="rich-content">
+                    <?php echo !empty($pkg['whats_included']) ? $pkg['whats_included'] : "<p class='text-muted'>No details provided.</p>"; ?>
+                </div>
+            </div>
+        </section>
 
-          <section class="content-section" id="excluded">
-            <h2 class="section-title">What's Excluded</h2>
-            <div class="rich-content">
-                <?php 
-                    if (!empty($pkg['whats_excluded'])) {
-                        echo $pkg['whats_excluded']; 
-                    } else {
-                        echo "<p class='text-muted'>No details provided for what's excluded.</p>";
-                    }
-                ?>
+        <section class="content-section" id="excluded">
+            <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseExcluded">
+                <h3 class="section-title mb-0" style="border:none;">What's Excluded</h3>
+                <i class="bi bi-chevron-down chevron-icon"></i>
             </div>
-          </section>
+            <div class="collapse" id="collapseExcluded">
+                <div class="rich-content">
+                    <?php echo !empty($pkg['whats_excluded']) ? $pkg['whats_excluded'] : "<p class='text-muted'>No details provided.</p>"; ?>
+                </div>
+            </div>
+        </section>
 
-          <section class="content-section" id="cancellation_policy">
-            <h2 class="section-title">Cancellation Policy</h2>
-            <div class="rich-content">
-                <?php 
-                    if (!empty($pkg['cancellation_policy'])) {
-                        echo $pkg['cancellation_policy']; 
-                    } else {
-                        echo "<p class='text-muted'>No cancellation policy has been specified.</p>";
-                    }
-                ?>
+        <section class="content-section" id="cancellation_policy">
+            <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseCancel">
+                <h3 class="section-title mb-0" style="border:none;">Cancellation Policy</h3>
+                <i class="bi bi-chevron-down chevron-icon"></i>
             </div>
-          </section>
+            <div class="collapse" id="collapseCancel">
+                <div class="rich-content">
+                    <?php echo !empty($pkg['cancellation_policy']) ? $pkg['cancellation_policy'] : "<p class='text-muted'>No policy specified.</p>"; ?>
+                </div>
+            </div>
+        </section>
 
           <?php if (!empty($extra_sections)): ?>
-            <?php foreach($extra_sections as $section): ?>
+            <?php foreach($extra_sections as $index => $section): 
+                // Create a unique ID using loop index
+                $uniqueId = 'collapseExtra_' . $index; 
+            ?>
               <section class="content-section">
-                <h2 class="section-title"><?= esc($section['title']) ?></h2>
-                <div class="rich-content">
-                  <?= $section['description'] // Outputting raw HTML ?>
+                <div class="section-header" data-bs-toggle="collapse" data-bs-target="#<?= $uniqueId ?>">
+                    <h3 class="section-title mb-0" style="border:none;"><?= esc($section['title']) ?></h3>
+                    <i class="bi bi-chevron-down chevron-icon"></i>
+                </div>
+                <div class="collapse" id="<?= $uniqueId ?>">
+                    <div class="rich-content">
+                      <?= $section['description'] ?>
+                    </div>
                 </div>
               </section>
             <?php endforeach; ?>
@@ -1023,38 +568,29 @@ if ($gridCount === 0 && !$first_video) {
           <section class="content-section">
 
         <section class="content-section">
-          <h2 class="section-title">Meet the Instructors</h2>
-          <?php if (!empty($instructors)): ?>
-            <div id="instructorList" class="d-grid gap-3">
-              <?php foreach ($instructors as $index => $ins): ?>
-                <div class="d-flex align-items-start gap-3 instructor-card <?= $index >= 2 ? 'extra-instructor d-none' : '' ?>">
-                  <img src="<?= esc($ins['photo'] ?? 'uploads/default-user.png') ?>"
-                       alt="<?= esc($ins['name']) ?>"
-                       class="instructor-photo">
-                  <div class="flex-grow-1">
-                    <h6 class="mb-0"><?= esc($ins['name']) ?></h6>
-                    <?php if (!empty($ins['specialization'])): ?>
-                      <p class="text-muted small mb-1"><?= esc($ins['specialization']) ?></p>
-                    <?php endif; ?>
-                    <p class="text-secondary small lh-base mb-0">
-                      <?= nl2br(esc(substr($ins['bio'], 0, 350))) ?>
-                      <?= strlen($ins['bio']) > 350 ? '…' : '' ?>
-                    </p>
-                  </div>
+          <div class="section-header" data-bs-toggle="collapse" data-bs-target="#collapseInstructors">
+              <h3 class="section-title mb-0" style="border:none;">Meet the Instructors</h3>
+              <i class="bi bi-chevron-down chevron-icon"></i>
+          </div>
+          <div class="collapse" id="collapseInstructors">
+              <?php if (!empty($instructors)): ?>
+                <div id="instructorList" class="d-grid gap-3 pt-3">
+                  <?php foreach ($instructors as $index => $ins): ?>
+                    <div class="d-flex align-items-start gap-3 instructor-card">
+                          <img src="<?= esc($ins['photo'] ?? 'uploads/default-user.png') ?>" alt="<?= esc($ins['name']) ?>" class="instructor-photo">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0"><?= esc($ins['name']) ?></h6>
+                                <p class="text-secondary small lh-base mb-0">
+                                    <?= nl2br(esc(substr($ins['bio'], 0, 350))) ?>
+                                </p>
+                            </div>
+                      </div>
+                  <?php endforeach; ?>
                 </div>
-              <?php endforeach; ?>
-            </div>
-
-            <?php if (count($instructors) > 2): ?>
-              <div class="text-center mt-3">
-                <button type="button" id="toggleInstructors" class="btn btn-outline-secondary btn-sm">
-                  Show More <i class="bi bi-chevron-down"></i>
-                </button>
-              </div>
-            <?php endif; ?>
-          <?php else: ?>
-            <p class="text-muted">No instructors listed yet.</p>
-          <?php endif; ?>
+              <?php else: ?>
+                <p class="text-muted pt-2">No instructors listed yet.</p>
+              <?php endif; ?>
+          </div>
         </section>
 
         <section class="content-section" id="reviews">
@@ -1098,15 +634,15 @@ if ($gridCount === 0 && !$first_video) {
         </section>    
 
         <?php 
-    $modal_index = 0; // Start modal index at 0
-    
-    // --- RENDER VIDEO FIRST, IF IT EXISTS ---
-    if ($first_video): 
-        $vid = $first_video;
-        
-        // ✅ FIX: Check type OR path, to be safe
-        $is_file = ($vid['type'] == 'video_file' || str_starts_with($vid['media_path'], 'uploads/'));
-    ?>
+          $modal_index = 0; // Start modal index at 0
+          
+          // --- RENDER VIDEO FIRST, IF IT EXISTS ---
+          if ($first_video): 
+              $vid = $first_video;
+              
+              // ✅ FIX: Check type OR path, to be safe
+              $is_file = ($vid['type'] == 'video_file' || str_starts_with($vid['media_path'], 'uploads/'));
+        ?>
           <section class="content-section">
             <h2 class="section-title">Videos</h2>
             <div class="ratio ratio-16x9">
@@ -1134,7 +670,8 @@ if ($gridCount === 0 && !$first_video) {
         $modal_index++; // Increment modal index
     endif; ?>
 
-      </div> <div class="col-lg-4">
+      </div> 
+      <div class="col-lg-4">
         <div class="booking-box-sticky">
           <div class="booking-box-header">
             <div class="price-from">Starting from</div>
@@ -1448,6 +985,74 @@ if ($gridCount === 0 && !$first_video) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <script>
+
+  document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. Icon Rotation Logic
+    const collapseElements = document.querySelectorAll('.collapse');
+    collapseElements.forEach(el => {
+        el.addEventListener('show.bs.collapse', () => {
+            const icon = el.previousElementSibling.querySelector('.bi-chevron-down');
+            if(icon) icon.classList.add('rotate-180');
+        });
+        el.addEventListener('hide.bs.collapse', () => {
+            const icon = el.previousElementSibling.querySelector('.bi-chevron-down');
+            if(icon) icon.classList.remove('rotate-180');
+        });
+    });
+
+    // 2. Expand All / Hide All Logic
+    const toggleBtn = document.getElementById('globalToggleBtn');
+    const toggleIcon = toggleBtn.querySelector('i');
+    const toggleText = toggleBtn.querySelector('span');
+    let isExpanded = false;
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const allCollapses = document.querySelectorAll('.content-section .collapse');
+            
+            if (isExpanded) {
+                // Hide All
+                allCollapses.forEach(c => {
+                    const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
+                    bsCollapse.hide();
+                });
+                toggleText.textContent = "Expand all";
+                toggleIcon.classList.remove('bi-dash-lg');
+                toggleIcon.classList.add('bi-plus-lg');
+                isExpanded = false;
+            } else {
+                // Show All
+                allCollapses.forEach(c => {
+                    const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
+                    bsCollapse.show();
+                });
+                toggleText.textContent = "Hide all";
+                toggleIcon.classList.remove('bi-plus-lg');
+                toggleIcon.classList.add('bi-dash-lg');
+                isExpanded = true;
+            }
+        });
+    }
+});
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const navbar = document.querySelector('.navbar');
+    const topBarHeight = document.querySelector('.top-bar') ? document.querySelector('.top-bar').offsetHeight : 0;
+
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > topBarHeight) {
+            navbar.classList.add('sticky');
+            // Optional: Add padding to body to prevent jump
+            // document.body.style.paddingTop = navbar.offsetHeight + 'px'; 
+        } else {
+            navbar.classList.remove('sticky');
+            // document.body.style.paddingTop = '0';
+        }
+    });
+});
+
+
 document.addEventListener("DOMContentLoaded", () => {
   
   /* Helper: add days to date (returns yyyy-mm-dd) */
