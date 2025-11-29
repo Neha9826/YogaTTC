@@ -220,18 +220,42 @@ if ($bstmt) {
     $bstmt->close();
 }
 
-// reviews count
-$reviews_count = 0;
-if ($conn->query("SHOW TABLES LIKE 'y_reviews'")->num_rows) {
-    $rvq = $conn->prepare("SELECT COUNT(*) AS c FROM y_reviews WHERE retreat_id = ?");
-    if ($rvq) {
-        $rvq->bind_param('i', $retreatId);
-        $rvq->execute();
-        $rr = $rvq->get_result()->fetch_assoc();
-        $reviews_count = (int)($rr['c'] ?? 0);
-        $rvq->close();
-    }
-}
+  // reviews count
+
+  $reviews = [];
+  $reviews_count = 0;
+  $average_rating = 0;
+
+  if ($conn->query("SHOW TABLES LIKE 'y_reviews'")->num_rows) {
+      // Fetch approved reviews for this package OR retreat
+      // We order by date descending (newest first)
+      $rvq = $conn->prepare("
+          SELECT user_name, rating, review_text, created_at 
+          FROM y_reviews 
+          WHERE (package_id = ? OR retreat_id = ?) 
+          AND is_approved = 1 
+          ORDER BY created_at DESC
+      ");
+      
+      if ($rvq) {
+          $rvq->bind_param('ii', $packageId, $retreatId);
+          $rvq->execute();
+          $res = $rvq->get_result();
+          
+          $total_stars = 0;
+          while ($row = $res->fetch_assoc()) {
+              $reviews[] = $row;
+              $total_stars += (int)$row['rating'];
+          }
+          
+          $reviews_count = count($reviews);
+          if ($reviews_count > 0) {
+              $average_rating = round($total_stars / $reviews_count, 1);
+          }
+          
+          $rvq->close();
+      }
+  }
 
 // Helper to get gallery image path, checking for array/string
 function getImagePath($img) {
@@ -244,32 +268,43 @@ function getImagePath($img) {
     return 'images/default-package.jpg'; // fallback
 }
 
-// Prepare gallery images for the grid
-$galleryAll = $gallery; // for modal
-$galleryGrid = array_slice($galleryAll, 0, 5); // Get up to 5 real images
-$galleryCount = count($galleryGrid); // This is the key variable
+// --- NEW GALLERY LOGIC (Unified Master List) ---
 
-// Fill grid with ONE placeholder if NO images exist
-// --- Gallery Grid (Video + Images) ---
-$placeholderImg = 'https://via.placeholder.com/600x400.png?text=Yoga+Retreat';
-$first_video = $videos[0] ?? null; // Get the first video, if it exists
-$galleryAll = array_merge($videos, $gallery); // For the "View All" modal (videos first)
-$totalMedia = count($galleryAll);
+// 1. Define $first_video explicitly to fix the Undefined Variable Error
+$first_video = !empty($videos) ? $videos[0] : null; 
 
-if ($first_video) {
-    // If we have a video, the grid will be 1 video + 4 images
-    $galleryGrid = array_slice($gallery, 0, 4); // Get the first 4 IMAGES
-    $gridCount = 5; // 1 video + 4 images (total)
-} else {
-    // No video, so the grid is just the first 5 images
-    $galleryGrid = array_slice($gallery, 0, 5); // Get up to 5 IMAGES
-    $gridCount = count($galleryGrid);
+// 2. Prepare Master List
+$master_media = array_merge($videos, $gallery);
+$totalMedia = count($master_media);
+
+// 3. Handle Empty State
+if ($totalMedia === 0) {
+    $master_media[] = [
+        'image_path' => 'https://via.placeholder.com/600x400.png?text=Yoga+Retreat',
+        'alt_text' => 'Placeholder',
+        'type' => 'image'
+    ];
+    $totalMedia = 1;
 }
 
-// Handle edge case where there is nothing at all
-if ($gridCount === 0 && !$first_video) {
-    $galleryGrid[] = ['image_path' => $placeholderImg, 'alt_text' => 'Placeholder'];
-    $gridCount = 1;
+// 4. Prepare Desktop Grid Items (First 5)
+$grid_items = array_slice($master_media, 0, 5);
+$gridCount = count($grid_items);
+
+// Helper functions (kept inline for safety)
+if (!function_exists('getMediaUrl')) {
+    function getMediaUrl($item) {
+        if (isset($item['media_path'])) return $item['media_path'];
+        if (isset($item['image_path'])) return $item['image_path'];
+        return '';
+    }
+}
+if (!function_exists('isVid')) {
+    function isVid($item) {
+        $path = getMediaUrl($item);
+        return (isset($item['type']) && ($item['type'] == 'video' || $item['type'] == 'video_file')) 
+               || str_starts_with($path, 'uploads/retreats/videos/');
+    }
 }
 
 ?>
@@ -290,68 +325,86 @@ if ($gridCount === 0 && !$first_video) {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/yoga.css">
-  <link rel="stylesheet" href="css/yPackages.css">
+  <link rel="stylesheet" href="css/yPackages.css?v=1.1">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
 </head>
 <body class="yoga-page">
 <?php include 'yoga_navbar.php'; ?>
-<div class="gallery-grid gallery-count-<?= $gridCount ?>">
-    
-    <?php 
-    $modal_index = 0; // Start modal index at 0
-    
-    // --- RENDER VIDEO FIRST, IF IT EXISTS ---
-    if ($first_video): 
-        $vid = $first_video;
-        
-        // ✅ FIX: Check type OR path, to be safe
-        $is_file = ($vid['type'] == 'video_file' || str_starts_with($vid['media_path'], 'uploads/'));
-    ?>
-        <div class="gallery-item video-item" data-bs-toggle="modal" data-bs-target="#galleryModal" data-bs-slide-to="<?= $modal_index ?>">
-            <?php if ($is_file): ?>
-                <video playsinline muted loop controls preload="metadata">
-                    <source src="<?= esc(getImagePath($vid['media_path'])) ?>">
-                </video>
-            <?php else: // Embed YouTube/Vimeo Link
-                $embed_url = '';
-                if (preg_match('/(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $vid['media_path'], $matches)) {
-                    $embed_url = 'https://www.youtube.com/embed/' . $matches[2] . '?autoplay=1&mute=1&loop=1&playlist=' . $matches[2];
-                } elseif (preg_match('/vimeo\.com\/([0-9]+)/', $vid['media_path'], $matches)) {
-                    $embed_url = 'https://player.vimeo.com/video/' . $matches[1] . '?autoplay=1&muted=1&loop=1&background=1';
-                }
-            ?>
-                <?php if ($embed_url): ?>
-                    <iframe src="<?= $embed_url ?>" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-                <?php else: ?>
-                    <div class="p-3 text-white">Video format not supported for grid preview.</div>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
-    <?php 
-        $modal_index++; // Increment modal index
-    endif; 
 
-    // --- RENDER IMAGES ---
-    foreach ($galleryGrid as $img): 
-        $isLastGridItem = ($modal_index == $gridCount - 1);
-        $showViewAll = $isLastGridItem && ($totalMedia > $gridCount);
-    ?>
-        <div class="gallery-item <?= $showViewAll ? 'has-view-all-btn' : '' ?>" 
-             style="background-image: url('<?= esc(getImagePath($img)) ?>');" 
-             data-bs-toggle="modal" data-bs-target="#galleryModal" data-bs-slide-to="<?= $modal_index ?>">
-            
-            <?php if ($showViewAll): ?>
-                <button class="btn btn-sm view-all-btn" data-bs-toggle="modal" data-bs-target="#galleryModal">
-                    <i class="bi bi-images me-1"></i> View all (<?= $totalMedia ?>)
-                </button>
-            <?php endif; ?>
+<div class="container mt-3 mb-4">
+    
+    <div id="mobileGalleryCarousel" class="carousel slide d-block d-md-none rounded-3 overflow-hidden" data-bs-ride="false">
+        <div class="carousel-inner">
+            <?php foreach ($master_media as $idx => $media): 
+                 $url = getMediaUrl($media);
+                 if (!$url) continue;
+                 $activeClass = ($idx === 0) ? 'active' : '';
+            ?>
+            <div class="carousel-item <?= $activeClass ?>" onclick="openGalleryModal(<?= $idx ?>)">
+                <div class="ratio ratio-4x3"> <?php if (isVid($media)): ?>
+                        <video muted playsinline src="<?= esc($url) ?>#t=1" class="w-100 h-100 object-fit-cover"></video>
+                        <div class="position-absolute top-50 start-50 translate-middle text-white fs-1">
+                            <i class="bi bi-play-circle-fill" style="text-shadow: 0 2px 5px rgba(0,0,0,0.5);"></i>
+                        </div>
+                    <?php else: ?>
+                        <img src="<?= esc($url) ?>" class="d-block w-100 h-100 object-fit-cover" alt="Slide">
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
         </div>
-    <?php 
-        $modal_index++; // Increment modal index
-    endforeach; 
-    ?>
+        
+        <button class="carousel-control-prev" type="button" data-bs-target="#mobileGalleryCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#mobileGalleryCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+        
+        <div class="position-absolute bottom-0 end-0 mb-3 me-3">
+             <span class="badge bg-dark bg-opacity-75 rounded-pill px-3">
+                <i class="bi bi-images me-1"></i> <?= $totalMedia ?> Photos
+             </span>
+        </div>
+    </div>
+
+
+    <div class="gallery-grid-wrapper d-none d-md-block">
+        <div class="gallery-grid gallery-count-<?= $gridCount ?>">
+            <?php foreach ($grid_items as $idx => $media): 
+                $url = getMediaUrl($media);
+                if (!$url) continue;
+
+                $isLastItem = ($idx == $gridCount - 1);
+                $showViewAll = $isLastItem && ($totalMedia > $gridCount);
+            ?>
+                <div class="gallery-item" onclick="openGalleryModal(<?= $idx ?>)">
+                     
+                    <?php if (isVid($media)): ?>
+                        <video muted playsinline loop onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;" class="grid-video-preview">
+                            <source src="<?= esc($url) ?>">
+                        </video>
+                        <div class="center-play-icon"><i class="bi bi-play-circle"></i></div>
+                    <?php else: ?>
+                        <div class="grid-img-bg" style="background-image: url('<?= esc($url) ?>');"></div>
+                    <?php endif; ?>
+
+                    <?php if ($showViewAll): ?>
+                        <div class="view-all-overlay">
+                            <button class="btn btn-light btn-sm fw-bold">
+                                <i class="bi bi-grid-3x3-gap-fill me-1"></i> View all photos
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
 </div>
 
 <main class="py-4">
@@ -593,32 +646,113 @@ if ($gridCount === 0 && !$first_video) {
           </div>
         </section>
 
+        <section class="content-section mb-4">
+            <h3 class="section-title">Leave a Review</h3>
+            <form id="reviewForm" class="mt-3">
+                <input type="hidden" name="package_id" value="<?= (int)$pkg['id'] ?>">
+                <input type="hidden" name="retreat_id" value="<?= (int)$pkg['retreat_id'] ?>">
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" name="user_name" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email (kept private)</label>
+                        <input type="email" name="user_email" class="form-control" required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label">Rating</label>
+                        <div class="rating-input d-flex gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" id="r5" value="5" checked>
+                                <label class="form-check-label text-warning" for="r5"><i class="bi bi-star-fill"></i> 5</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" id="r4" value="4">
+                                <label class="form-check-label text-warning" for="r4"><i class="bi bi-star-fill"></i> 4</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" id="r3" value="3">
+                                <label class="form-check-label text-warning" for="r3"><i class="bi bi-star-fill"></i> 3</label>
+                            </div>
+                             <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" id="r2" value="2">
+                                <label class="form-check-label text-warning" for="r2"><i class="bi bi-star-fill"></i> 2</label>
+                            </div>
+                             <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" id="r1" value="1">
+                                <label class="form-check-label text-warning" for="r1"><i class="bi bi-star-fill"></i> 1</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Your Review</label>
+                        <textarea name="review_text" class="form-control" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="col-12">
+                         <div id="reviewStatus" class="mb-2"></div>
+                        <button type="submit" class="btn btn-brand-primary btn-sm">Submit Review</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
         <section class="content-section" id="reviews">
             <h2 class="section-title">Reviews</h2>
-            <div class="d-flex align-items-center mb-3">
-                <span class="fw-bold fs-4 me-2">4.8</span>
-                <div class_="me-2">
-                    <i class="bi bi-star-fill" style="color:var(--star-color);"></i>
-                    <i class="bi bi-star-fill" style="color:var(--star-color);"></i>
-                    <i class="bi bi-star-fill" style="color:var(--star-color);"></i>
-                    <i class="bi bi-star-fill" style="color:var(--star-color);"></i>
-                    <i class="bi bi-star-half" style="color:var(--star-color);"></i>
+
+            <?php if ($reviews_count > 0): ?>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="fw-bold fs-4 me-2"><?= $average_rating ?></span>
+                    <div class="me-2 text-warning">
+                        <?php
+                        // Logic to display average stars (full, half, empty)
+                        for ($i = 1; $i <= 5; $i++) {
+                            if ($average_rating >= $i) {
+                                echo '<i class="bi bi-star-fill"></i> ';
+                            } elseif ($average_rating >= $i - 0.5) {
+                                echo '<i class="bi bi-star-half"></i> ';
+                            } else {
+                                echo '<i class="bi bi-star"></i> ';
+                            }
+                        }
+                        ?>
+                    </div>
+                    <span class="text-muted ms-2">(Based on <?= $reviews_count ?> reviews)</span>
                 </div>
-                <span class="text-muted ms-2">(Based on <?= $reviews_count ?> reviews)</span>
-            </div>
-            <div class="review-item border-bottom pb-3 mb-3">
-                <div class="d-flex justify-content-between">
-                    <h6 class="fw-bold">Amazing Experience!</h6>
-                    <span class="small text-muted">March 27, 2025</span>
+
+                <div class="review-list">
+                    <?php foreach ($reviews as $index => $review): 
+                        // Format Date (e.g., March 27, 2025)
+                        $dateStr = date('F d, Y', strtotime($review['created_at']));
+                        // Check if it's the last item to remove the border-bottom
+                        $borderClass = ($index === $reviews_count - 1) ? '' : 'border-bottom pb-3 mb-3';
+                    ?>
+                        <div class="review-item <?= $borderClass ?>">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="small text-warning mb-1">
+                                        <?php for($s=0; $s<$review['rating']; $s++) echo '<i class="bi bi-star-fill"></i> '; ?>
+                                        <?php for($s=$review['rating']; $s<5; $s++) echo '<i class="bi bi-star"></i> '; ?>
+                                    </div>
+                                    <h6 class="fw-bold mb-1"><?= esc($review['user_name']) ?></h6>
+                                </div>
+                                <span class="small text-muted"><?= $dateStr ?></span>
+                            </div>
+                            
+                            <p class="small mt-2">"<?= nl2br(esc($review['review_text'])) ?>"</p>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
-                <p class="small">"I liked everything about this school, all the staff is very spiritual, the founder was educated in a Gurukul, so they have the seeking of the..."</p>
-                <span class="fw-bold small">Vlad A. - Romania</span>
-            </div>
-             <div class="review-item">
-                <h6 class="fw-bold">Life Changing</h6>
-                <p class="small">"The instructors were knowledgeable and the location was breathtaking. Highly recommend."</p>
-                <span class="fw-bold small">Jane D. - USA</span>
-            </div>
+
+            <?php else: ?>
+                <div class="text-muted py-3">
+                    <i class="bi bi-chat-square-text me-2"></i> No reviews yet. Be the first to share your experience!
+                </div>
+            <?php endif; ?>
         </section>
 
         <section class="content-section">
@@ -672,6 +806,7 @@ if ($gridCount === 0 && !$first_video) {
 
       </div> 
       <div class="col-lg-4">
+        <div class="sidebar-wrapper" style="position: sticky; top: 20px;">
         <div class="booking-box-sticky">
           <div class="booking-box-header">
             <div class="price-from">Starting from</div>
@@ -776,75 +911,64 @@ if ($gridCount === 0 && !$first_video) {
             
             </div>
         </div>
-      </div> 
-          <div class="booking-box-footer">
+        <div class="booking-box-footer">
             <div class="booking-btn-group">
                 <button type="button" class="btn btn-brand-primary btn-sm" id="requestBookBtn">Request to book</button>
                 <button type="button" class="btn btn-brand-outline btn-sm" id="sendQueryBtn">Send Inquiry</button>
             </div>
           </div>
+      </div> 
+                      </div>
     </div>
   </div>
 </main>
 
-<div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
+<div class="modal fade modal-fullscreen lightbox-modal" id="galleryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="galleryModalLabel"><?= esc($pkg['title']) ?></h5>
+        <h5 class="modal-title fs-6"><?= esc($pkg['title']) ?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body p-0">
-        <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-
+      <div class="modal-body">
         
-          <div class="carousel-inner">
-            <?php if (empty($galleryAll)): ?>
-              <div class="carousel-item active">
-                <img src="<?= $placeholderImg ?>" class="d-block w-100" alt="Placeholder">
-              </div>
-            <?php else: ?>
-              <?php foreach ($galleryAll as $i => $media): ?>
-                <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
-                  
-                  <?php 
-                  // ✅ FIX: Check type OR path, to be safe
-                  $is_video = (isset($media['type']) && ($media['type'] == 'video' || $media['type'] == 'video_file')) || str_starts_with($media['media_path'], 'uploads/retreats/videos/');
-                  $is_file = (isset($media['type']) && $media['type'] == 'video_file') || str_starts_with($media['media_path'], 'uploads/retreats/videos/');
-                  
-                  if ($is_video): 
-                      $vid = $media;
-                  ?>
-                      <div class="d-flex justify-content-center align-items-center bg-dark" style="height: 90vh;">
-                      <?php if ($is_file): ?>
-                          <video class="d-block" style="max-width: 100%; max-height: 90vh;" controls>
-                              <source src="<?= esc(getImagePath($vid['media_path'])) ?>">
-                          </video>
-                      <?php else: // It's a URL Link
-                          $embed_url = '';
-                          if (preg_match('/(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $vid['media_path'], $matches)) {
-                              $embed_url = 'https://www.youtube.com/embed/' . $matches[2];
-                          } elseif (preg_match('/vimeo\.com\/([0-9]+)/', $vid['media_path'], $matches)) {
-                              $embed_url = 'https://player.vimeo.com/video/' . $matches[1];
-                          }
-                      ?>
-                          <?php if($embed_url): ?>
-                              <iframe src="<?= $embed_url ?>" style="width: 100%; height: 90vh; border:0;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-                          <?php else: ?>
-                              <p class="text-white">Video link is invalid.</p>
-                          <?php endif; ?>
-                      <?php endif; ?>
-                      </div>
+        <div id="galleryCarousel" class="carousel slide carousel-fade w-100 h-100 d-flex align-items-center" data-bs-ride="false"> 
+          <div class="carousel-inner w-100 h-100">
+            <?php foreach ($master_media as $i => $media): 
+                // 1. Get the path safely using the helper function
+                $url = getMediaUrl($media);
+                
+                // 2. Safe check for video type
+                $is_video = (isset($media['type']) && ($media['type'] == 'video' || $media['type'] == 'video_file')) 
+                            || (strpos($url, 'uploads/retreats/videos/') === 0);
+            ?>
+                <div class="carousel-item h-100 <?= $i === 0 ? 'active' : '' ?>">
+                    <div class="d-flex justify-content-center align-items-center h-100 w-100">
+                        
+                        <?php if ($is_video): ?>
+                            <?php if (str_starts_with($url, 'uploads/')): ?>
+                                <video class="lightbox-media" controls playsinline>
+                                    <source src="<?= esc($url) ?>">
+                                </video>
+                             <?php else: 
+                                // Embed Logic for YouTube/Vimeo
+                                $embed_url = '';
+                                if (preg_match('/(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $url, $matches)) {
+                                    $embed_url = 'https://www.youtube.com/embed/' . $matches[2];
+                                } elseif (preg_match('/vimeo\.com\/([0-9]+)/', $url, $matches)) {
+                                    $embed_url = 'https://player.vimeo.com/video/' . $matches[1];
+                                }
+                             ?>
+                                <iframe src="<?= $embed_url ?>" class="lightbox-media" style="width:100%; aspect-ratio:16/9; max-width:900px;" frameborder="0" allowfullscreen></iframe>
+                             <?php endif; ?>
 
-                  <?php else: // It's an image
-                      $img = $media;
-                  ?>
-                      <img src="<?= esc(getImagePath($img)) ?>" class="d-block w-100" alt="<?= esc($img['alt_text'] ?? 'Gallery image') ?>" style="max-height: 90vh; object-fit: contain;">
-                  <?php endif; ?>
+                        <?php else: ?>
+                            <img src="<?= esc($url) ?>" class="lightbox-media" alt="Gallery Image">
+                        <?php endif; ?>
 
+                    </div>
                 </div>
-              <?php endforeach; ?>
-            <?php endif; ?>
+            <?php endforeach; ?>
           </div>
 
           <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
@@ -856,6 +980,7 @@ if ($gridCount === 0 && !$first_video) {
             <span class="visually-hidden">Next</span>
           </button>
         </div>
+
       </div>
     </div>
   </div>
@@ -986,7 +1111,67 @@ if ($gridCount === 0 && !$first_video) {
 
 <script>
 
+  // Function to open gallery at specific index
+function openGalleryModal(index) {
+    const modalEl = document.getElementById('galleryModal');
+    const carouselEl = document.getElementById('galleryCarousel');
+    
+    // Create bootstrap instances
+    const modal = new bootstrap.Modal(modalEl);
+    const carousel = new bootstrap.Carousel(carouselEl);
+    
+    // Move carousel to index
+    carousel.to(index);
+    
+    // Show modal
+    modal.show();
+    
+    // Stop videos when modal closes
+    modalEl.addEventListener('hidden.bs.modal', function () {
+        modalEl.querySelectorAll('video').forEach(v => v.pause());
+        modalEl.querySelectorAll('iframe').forEach(i => {
+             // Reset iframe src to stop audio (brute force)
+             const src = i.src;
+             i.src = src; 
+        });
+    });
+}
+
   document.addEventListener("DOMContentLoaded", () => {
+
+
+    // AJAX submit (Review)
+    const reviewForm = document.getElementById('reviewForm');
+    if(reviewForm) {
+      reviewForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const status = document.getElementById('reviewStatus');
+        const submitBtn = reviewForm.querySelector('button[type="submit"]');
+        
+        status.innerHTML = '<span class="text-muted">Submitting...</span>';
+        submitBtn.disabled = true;
+
+        try {
+          const res = await fetch('submitReview.php', { method: 'POST', body: new FormData(e.target) });
+          const j = await res.json();
+
+          if (j.success) {
+            status.innerHTML = '<div class="alert alert-success py-2">Thank you! Your review has been submitted for approval.</div>';
+            e.target.reset();
+            setTimeout(() => {
+              status.innerHTML = '';
+              submitBtn.disabled = false;
+            }, 4000);
+          } else {
+            status.innerHTML = '<div class="alert alert-danger py-2">' + (j.msg || 'Error submitting review.') + '</div>';
+            submitBtn.disabled = false;
+          }
+        } catch (err) {
+          status.innerHTML = '<div class="alert alert-danger py-2">Network error. Please try again.</div>';
+          submitBtn.disabled = false;
+        }
+      });
+    }
     
     // 1. Icon Rotation Logic
     const collapseElements = document.querySelectorAll('.collapse');

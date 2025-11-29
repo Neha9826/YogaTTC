@@ -48,7 +48,7 @@
         left: 0;
         width: 100%;
         animation: slideDown 0.3s;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 10px rgba(172, 172, 172, 0.3);
     }
 
     @keyframes slideDown {
@@ -363,57 +363,82 @@
       text-decoration: underline;
     }
     
-    /* Booking Buttons */
-    .booking-btn-group {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-      /* padding-top: 1rem; */
+   /* --- DESKTOP LAYOUT (Default) --- */
+
+/* 1. The Wrapper handles the 'Sticky' scrolling now */
+.sidebar-wrapper {
+    position: sticky;
+    top: 20px; /* Sticks to top of screen when scrolling */
+    width: 100%; /* Force full width of the column */
+}
+
+/* 2. The Pricing Card (Top) */
+.booking-box-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+    width: 100%; /* Fill the wrapper */
+}
+.booking-box-body {
+    padding: 1.5rem;
+    max-height: 60vh; /* Allow inner scrolling if list is too long */
+    overflow-y: auto;
+}
+
+/* 3. The Footer (Bottom) */
+.booking-box-footer {
+    width: 100% !important; /* Force match wrapper width */
+    max-width: none !important; /* REMOVE any max-width limits */
+    margin-top: 10px;
+    background: transparent;
+    padding: 0;
+    position: static; /* Sit naturally under the card */
+    box-shadow: none;
+    border: none;
+}
+.booking-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* --- MOBILE LAYOUT (Small Screens Only) --- */
+@media (max-width: 991.98px) {
+    
+    /* On mobile, disable the wrapper stickiness */
+    .sidebar-wrapper {
+        position: static; 
     }
 
-    /* --- ADD THIS ENTIRE NEW RULE --- */
-    .booking-box-sticky {
-      position: sticky;
-      top: 20px;
-    }
-    /* Updated .booking-box-footer for better responsiveness */
+    /* Make the footer stick to the bottom of the screen */
     .booking-box-footer {
-      position: sticky;
-      bottom: 0;
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
-      background-color: #fff;
-      margin-top: auto;
-      border-radius: 8px;
-      /* Remove fixed width to allow flexibility */
-      width: 100%; 
-      max-width: 350px; /* Limit width only on larger screens */
-      align-self: flex-end;
-      margin-left: auto;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.05); /* Optional: adds subtle shadow for "floating" feel */
-      z-index: 1020; /* Ensure it stays above other content */
-    }
-
-    /* Mobile specific adjustment to ensure full width and proper spacing */
-    @media (max-width: 991.98px) {
-      .booking-box-footer {
-        max-width: 100%; /* Allow full width on mobile */
-        border-radius: 0; /* Remove rounded corners at the bottom of screen */
-        position: fixed; /* Lock to bottom of viewport on mobile */
+        position: fixed;
+        bottom: 0;
         left: 0;
         right: 0;
-        bottom: 0;
-        margin: 0;
-      }
-      
-      /* Ensure the buttons stack or sit side-by-side nicely */
-      .booking-btn-group {
-        display: flex; /* Use flex instead of grid for better control */
-        flex-direction: column; /* Stack them vertically like your screenshot */
-        gap: 0.75rem;
-      }
+        background: #fff;
+        padding: 15px;
+        z-index: 1050;
+        border-top: 1px solid #eee;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        margin-top: 0;
+        border-radius: 0;
     }
-
+    
+    /* Ensure buttons are side-by-side or stacked nicely on mobile */
+    .booking-btn-group {
+        flex-direction: column; 
+        width: 100%;
+    }
+    
+    /* Add padding to body so footer doesn't cover content */
+    body {
+        padding-bottom: 120px; 
+    }
+}
     .booking-btn-group .btn {
       padding: 0.75rem;
       font-size: 1rem;
@@ -599,4 +624,137 @@
 }
 .expand-toggle-btn:hover {
   background-color: #f0f0f0;
+}
+
+/* --- MOBILE GALLERY SLIDER (New) --- */
+.mobile-gallery-slider {
+    display: none; /* Hidden on desktop */
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 10px;
+    padding: 0 15px; /* Edge spacing */
+    margin-bottom: 20px;
+    margin-top: 20px;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.mobile-gallery-slider::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+}
+.mobile-gallery-item {
+    display: inline-block;
+    width: 85%; /* Shows a peek of the next image */
+    height: 250px;
+    border-radius: 12px;
+    scroll-snap-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+.mobile-gallery-item img, 
+.mobile-gallery-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Play icon overlay for video thumbnails */
+.video-overlay-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    pointer-events: none;
+}
+
+/* --- DESKTOP GRID --- */
+/* Hide the grid on mobile now */
+@media (max-width: 767.98px) {
+    .gallery-grid {
+        display: none !important;
+    }
+    .mobile-gallery-slider {
+        display: block; /* Show slider on mobile */
+    }
+}
+
+/* --- FULL SCREEN BLACK MODAL (Lightbox Style) --- */
+.lightbox-modal .modal-content {
+    background-color: #000; /* Pitch black background */
+    border: none;
+    height: 100vh; /* Force full height */
+}
+.lightbox-modal .modal-header {
+    border-bottom: none;
+    background: rgba(0,0,0,0.5); /* Semi-transparent header */
+    position: absolute;
+    width: 100%;
+    z-index: 1060;
+    top: 0;
+}
+.lightbox-modal .modal-title {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.lightbox-modal .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* Make 'X' white */
+}
+.lightbox-modal .modal-body {
+    display: flex;
+    align-items: center; /* Vertically center content */
+    justify-content: center;
+    height: 100%;
+    padding: 0;
+}
+/* Ensure images/videos fit but don't overflow */
+.lightbox-media {
+    max-height: 100vh;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain; /* Keeps aspect ratio intact */
+}
+
+.view-all-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+.grid-img-bg {
+    width: 100%; height: 100%;
+    background-size: cover; background-position: center;
+    transition: transform 0.3s;
+}
+.gallery-item:hover .grid-img-bg { transform: scale(1.05); }
+
+/* --- 1. Fix Review Form Overflow --- */
+.rating-input {
+    display: flex;
+    flex-wrap: wrap; /* Allows stars to wrap to next line on small screens */
+    gap: 5px;
+}
+.rating-input .form-check {
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/* --- 3. Fix Desktop Grid Layout --- */
+.gallery-grid {
+    /* Ensure it doesn't push width too wide */
+    width: 100%; 
+    max-width: 100%;
 }
